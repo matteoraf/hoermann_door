@@ -1,32 +1,27 @@
+# These substitutions allow the end user to override certain values
+substitutions:
+  name: "e3-supra-pic16"
+  friendly_name: "E3 Supramatic PIC16"
 esphome:
-  name: garage-door
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
   platform: ESP8266
   board: esp01_1m
   includes:
-    - garage-door-includes
+    - components/uap
 
 wifi:
-  networks:
-  - ssid: !secret wifi_name_1
-    password: !secret wifi_key_1
-  - ssid: !secret wifi_name_2
-    password: !secret wifi_key_2
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
-#  # Enable fallback hotspot (captive portal) in case wifi connection fails
-#  ap:
-#    ssid: "ESPHome Hotspot"
-#    password: !secret wifi_key_1
-#             
-#captive_portal:
-
-# Enable Home Assistant API
 api:
-  password: !secret api_password
   encryption:
-    key: !secret garage_door_key
-
-ota:
-  password: !secret ota_password
+    key: !secret api_key_e3_supra_pic16
+  
+ota:  
+  - platform: esphome
+    password: !secret ota_password
 
 # Enable logging
 logger:
@@ -90,4 +85,4 @@ switch:
     };
   switches:
     - name: "esp_garage_door_venting_position"
-    - name: "esp_garage_door_light_toggle"
+    - name: "esp_garage_door_light_toggle"    
