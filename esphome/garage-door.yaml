@@ -8,8 +8,10 @@ esphome:
   name_add_mac_suffix: false
   platform: ESP8266
   board: esp01_1m
-  includes:
-    - components/uap
+
+external_components:
+    - source: github://14yannick/hoermann_door
+      refresh: 0s
 
 wifi:
   ssid: !secret wifi_ssid
@@ -35,54 +37,69 @@ uart:
   rx_pin: GPIO13
   baud_rate: 19200
 
-custom_component:
-  - id: garage_door_comp
-    lambda: |-
-      auto door_component = new GarageDoorComponent(id(uart_bus));
-      return {door_component};
+uart:
+  id: uart_bus
+  tx_pin: GPIO15
+  rx_pin: GPIO13
+  baud_rate: 19200
+
+uapbridge_pic16:
+  id: garage_door_comp
+  uart_id: uart_bus
 
 text_sensor:
-  - platform: custom
-    id: garagedoor
-    lambda: |-
-      return {garage_door_get_comp(garage_door_comp)->state_sensor};
-    text_sensors:
-      name: "esp_garage_door_state"
+  - platform: uapbridge_pic16
+    id: garage_door_state
+    name: "Garage Door State"
+    #uncomment if you want to have your custom text
+#    filters:
+#      - substitute:
+#        - "Opening -> your text"
+#        - "Closing -> your text"
+#        - "Open -> your text"
+#        - "Closed -> your text"
+#        - "Stopped -> your text"
+#        - "Venting -> your text"
+#        - "Error -> your text"
 
 cover:
-  - platform: template
-    id: garage_door_template
-    name: "esp_garage_door"
+  - platform: uapbridge_pic16
+    name: Garage Door
     device_class: garage
-    open_action:
-      - lambda: |-
-          garage_door_get_comp(garage_door_comp)->action_open();
-      - logger.log: "Template Garage open"
-    close_action:
-      - lambda: |-
-          garage_door_get_comp(garage_door_comp)->action_close();
-      - logger.log: "Template Garage close"
-    stop_action:
-      - lambda: |-
-          garage_door_get_comp(garage_door_comp)->action_stop();
-      - logger.log: "Template Garage stop"
-    lambda: |-
-      auto state = garage_door_get_comp(garage_door_comp)->state_sensor->state.c_str();
-      if (strcmp(state, "closed") == 0) {
-        return COVER_CLOSED;
-      } else if (strcmp(state, "opening") == 0 || strcmp(state, "closing") == 0) {
-        return {};
-      } else {
-        return COVER_OPEN;
-      }
 
 switch:
-- platform: custom
-  lambda: |-
-    return {
-      garage_door_get_comp(garage_door_comp)->venting_switch,
-      garage_door_get_comp(garage_door_comp)->light_switch
-    };
-  switches:
-    - name: "esp_garage_door_venting_position"
-    - name: "esp_garage_door_light_toggle"    
+  - platform: uapbridge_pic16
+    venting_switch:
+      id: venting_switch
+      name: "Garage Venting Switch"
+    light_switch:
+      id: light_switch
+      name: "Garage Light Switch"
+
+binary_sensor:
+  - platform: uapbridge_pic16
+    is_connected:
+      name: "UAPBridge Connected"
+    relay_state:
+      name: "Garage Door Relay State"
+    error_state:
+      name: "Garage Door Error State"
+    prewarn_state:
+      name: "Garage Door Prewarn State"
+
+#optional BME Sensor
+#i2c:
+#  - id: bus_1
+#    sda: SDA
+#    scl: SCL
+#    scan: true
+#sensor:
+#  - platform: bme280_i2c
+#    temperature:
+#      name: "BME280 Temperature"
+#    pressure:
+#      name: "BME280 Pressure"
+#    humidity:
+#      name: "BME280 Humidity"
+#    address: 0x76
+#    update_interval: 10min
