@@ -37,12 +37,6 @@ uart:
   rx_pin: GPIO13
   baud_rate: 19200
 
-uart:
-  id: uart_bus
-  tx_pin: GPIO15
-  rx_pin: GPIO13
-  baud_rate: 19200
-
 uapbridge_pic16:
   id: garage_door_comp
   uart_id: uart_bus

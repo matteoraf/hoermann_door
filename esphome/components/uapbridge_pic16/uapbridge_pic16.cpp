@@ -10,6 +10,7 @@ void UAPBridge_pic16::setup() {
 void UAPBridge_pic16::loop() {
   if (millis() - this->last_parse_time > 60000) {
   this->data_valid = false;
+  this->data_has_changed = true;
   }
   if (this->read_rs232()) {
     this->parse_input();
@@ -115,14 +116,18 @@ bool UAPBridge_pic16::read_rs232() {
         if (data < 16) {
           len = data + 4; // 3 = SYNC + CMD + LEN + CHK, limit to 15 data bytes
         } else {
-          counter = 0;
+          counter = 0;  // Reset if length is invalid
         }
       } else if (counter == len) {
         if (this->calc_checksum(this->rx_buffer, len - 1) == data) {
-          counter = 0;
-          return true;
+          // Final check: make sure the length and checksum are valid
+          if (len > 0) {  // You could add extra checks here
+            counter = 0;
+            this->last_parse_time = millis(); // Update last parse time here
+            return true;
+          }
         }
-        counter = 0;
+        counter = 0;  // Reset if checksum doesn't match
       }
     } else {
       ESP_LOGD(TAG, "read_rs232, wrong SYNC byte data = %i", data);
@@ -133,7 +138,6 @@ bool UAPBridge_pic16::read_rs232() {
 
 void UAPBridge_pic16::parse_input() {
   if (this->rx_buffer[1] == 0x00 && this->rx_buffer[2] == 0x02) {
-    this->last_parse_time = millis();
     hoermann_state_t new_state = hoermann_state_stopped;
 
     if ((this->rx_buffer[3] & 0x01) == 0x01) {
