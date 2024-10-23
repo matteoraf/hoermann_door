@@ -56,10 +56,13 @@ class UAPBridge_pic16 : public uart::UARTDevice, public Component {
     void set_error_state(bool value) { this->error_state = value; }
     bool get_prewarn_state() const { return this->prewarn_state; }
     void set_prewarn_state(bool value) { this->prewarn_state = value; }
-    bool get_data_valid() const { return this->data_valid; }
-    void set_data_valid(bool value) { this->data_valid = value; }
+    bool get_pic16_com() const { return this->pic16_com; }
+    void set_pic16_com(bool value) { this->pic16_com = value; }
+    bool get_valid_broadcast() const { return this->valid_broadcast; }
+    void set_valid_broadcast(bool value) { this->valid_broadcast = value; }
     bool has_data_changed();
     void clear_data_changed_flag();
+
   protected:
     CallbackManager<void()> state_callback_;
     hoermann_state_t actual_state = hoermann_state_unkown;
@@ -72,7 +75,8 @@ class UAPBridge_pic16 : public uart::UARTDevice, public Component {
     bool relay_enabled = false;
     bool error_state = false;
     bool prewarn_state = false;
-    bool data_valid = false;
+    bool pic16_com = false;
+    bool valid_broadcast = false;
     bool data_has_changed = false;
 
     uint8_t last_rx_buffer[16] = {0};

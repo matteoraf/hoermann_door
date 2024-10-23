@@ -3,15 +3,18 @@
 namespace esphome {
 namespace uapbridge_pic16 {
 static const char *const TAG = "uapbridge_pic16";
+
 void UAPBridge_pic16::setup() {
   ESP_LOGCONFIG(TAG, "Garage setup called!");
 }
 
 void UAPBridge_pic16::loop() {
+  // Timeout mechanism for PIC16 communication
   if (millis() - this->last_parse_time > 60000) {
-  this->data_valid = false;
-  this->data_has_changed = true;
+    this->pic16_com = false;
+    this->data_has_changed = true;
   }
+
   if (this->read_rs232()) {
     this->parse_input();
   }
@@ -29,7 +32,7 @@ void UAPBridge_pic16::loop() {
 }
 
 void UAPBridge_pic16::add_on_state_callback(std::function<void()> &&callback) {
-  this->state_callback_.add(std::move(callback)); 
+  this->state_callback_.add(std::move(callback));
 }
 
 void UAPBridge_pic16::action_open() {
@@ -164,12 +167,19 @@ void UAPBridge_pic16::parse_input() {
     this->update_boolean_state(this->error_state, (this->rx_buffer[3] & 0x10) == 0x10);
     this->update_boolean_state(this->prewarn_state, (this->rx_buffer[4] & 0x01) == 0x01);
 
-    if (!this->data_valid) {
-      this->data_valid = true;
+    // Update valid_broadcast if a non-default message is received
+    if (!this->valid_broadcast && (this->rx_buffer[3] != 0 || this->rx_buffer[4] != 0)) {
+      this->valid_broadcast = true;
+      this->data_has_changed = true;
+    }
+
+    if (!this->pic16_com) {
+      this->pic16_com = true;
       this->data_has_changed = true;
     }
   }
 }
+
 
 void UAPBridge_pic16::send_command() {
   this->output_buffer[0] = SYNC_BYTE;

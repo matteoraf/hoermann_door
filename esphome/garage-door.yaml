@@ -65,21 +65,23 @@ switch:
   - platform: uapbridge_pic16
     venting_switch:
       id: venting_switch
-      name: "Garage Venting Switch"
+      name: "Venting Switch"
     light_switch:
       id: light_switch
-      name: "Garage Light Switch"
+      name: "Light Switch"
 
 binary_sensor:
   - platform: uapbridge_pic16
-    is_connected:
+    pic16_com:
       name: "UAPBridge Connected"
     relay_state:
-      name: "Garage Door Relay State"
+      name: "Relay State"
     error_state:
-      name: "Garage Door Error State"
+      name: "Error State"
     prewarn_state:
-      name: "Garage Door Prewarn State"
+      name: "Prewarn State"
+    data_has_changed:
+      name: "Changed Data Received"
 
 #optional BME Sensor
 #i2c:

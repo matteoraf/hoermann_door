@@ -17,7 +17,7 @@ class UAPBridge_pic16RelaySensor : public binary_sensor::BinarySensor, public Co
     UAPBridge_pic16 *parent_;
 };
 
-class UAPBridge_pic16IsConnected : public binary_sensor::BinarySensor, public Component {
+class UAPBridge_pic16Communication : public binary_sensor::BinarySensor, public Component {
   public:
     void set_uapbridge_pic16_parent(UAPBridge_pic16 *parent) { this->parent_ = parent; }
     void setup() override;
@@ -38,6 +38,16 @@ class UAPBridge_pic16ErrorSensor : public binary_sensor::BinarySensor, public Co
 };
 
 class UAPBridge_pic16PrewarnSensor : public binary_sensor::BinarySensor, public Component {
+  public:
+    void set_uapbridge_pic16_parent(UAPBridge_pic16 *parent) { this->parent_ = parent; }
+    void setup() override;
+    void on_event_triggered();
+    void dump_config() override;
+  protected:
+    UAPBridge_pic16 *parent_;
+};
+
+class UAPBridge_pic16DataHasChangedSensor : public binary_sensor::BinarySensor, public Component {
   public:
     void set_uapbridge_pic16_parent(UAPBridge_pic16 *parent) { this->parent_ = parent; }
     void setup() override;

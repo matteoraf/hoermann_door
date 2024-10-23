@@ -5,6 +5,7 @@ namespace uapbridge_pic16 {
 
 static const char *const TAG = "uapbridge_pic16.binary_sensor";
 
+// Relay Sensor
 void UAPBridge_pic16RelaySensor::setup() {
     this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
     this->publish_state(this->parent_->get_relay_enabled());
@@ -20,21 +21,23 @@ void UAPBridge_pic16RelaySensor::dump_config() {
     ESP_LOGCONFIG(TAG, "UAPBridge_pic16RelaySensor");
 }
 
-void UAPBridge_pic16IsConnected::setup() {
+// Communication Sensor
+void UAPBridge_pic16Communication::setup() {
     this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
-    this->publish_state(this->parent_->get_data_valid());
+    this->publish_state(this->parent_->get_pic16_com()); 
 }
 
-void UAPBridge_pic16IsConnected::on_event_triggered() {
-    if (this->parent_->get_data_valid() != this->state) {
-        this->publish_state(this->parent_->get_data_valid());
+void UAPBridge_pic16Communication::on_event_triggered() {
+    if (this->parent_->get_pic16_com() != this->state) { 
+        this->publish_state(this->parent_->get_pic16_com());
     }
 }
 
-void UAPBridge_pic16IsConnected::dump_config() {
-    ESP_LOGCONFIG(TAG, "UAPBridge_pic16IsConnected");
+void UAPBridge_pic16Communication::dump_config() {
+    ESP_LOGCONFIG(TAG, "UAPBridge_pic16Communication");
 }
 
+// Error Sensor
 void UAPBridge_pic16ErrorSensor::setup() {
     this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
     this->publish_state(this->parent_->get_error_state());
@@ -63,6 +66,24 @@ void UAPBridge_pic16PrewarnSensor::on_event_triggered() {
 
 void UAPBridge_pic16PrewarnSensor::dump_config() {
     ESP_LOGCONFIG(TAG, "UAPBridge_pic16PrewarnSensor");
+}
+
+void UAPBridge_pic16DataHasChangedSensor::setup() {
+    this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
+    this->publish_state(this->parent_->has_data_changed()); 
+}
+
+void UAPBridge_pic16DataHasChangedSensor::on_event_triggered() {
+    if (this->parent_->has_data_changed() != this->state) {
+        this->publish_state(this->parent_->has_data_changed());
+        if (this->parent_->has_data_changed()) {
+            this->parent_->clear_data_changed_flag(); // Clear the flag after publishing true
+        }
+    }
+}
+
+void UAPBridge_pic16DataHasChangedSensor::dump_config() {
+    ESP_LOGCONFIG(TAG, "UAPBridge_pic16DataHasChangedSensor");
 }
 
 }  // namespace uapbridge_pic16
