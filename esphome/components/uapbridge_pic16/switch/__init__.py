@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
-from esphome.const import CONF_ID, CONF_NAME
+from esphome.const import CONF_ID, CONF_NAME, ICON_FAN
 from .. import uapbridge_pic16_ns, CONF_UAPBRIDGE_PIC16_ID, UAPBridge_pic16
 
 DEPENDENCIES = ["uapbridge_pic16"]
@@ -17,7 +17,9 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_UAPBRIDGE_PIC16_ID): cv.use_id(UAPBridge_pic16),
         cv.Optional(CONF_SWITCH_VENT): switch.switch_schema(
             UAPBridge_pic16SwitchVent,
-        ),
+        ).extend({
+            cv.Optional("icon", default=ICON_FAN): cv.icon,
+        }),
         cv.Optional(CONF_SWITCH_LIGHT): switch.switch_schema(
             UAPBridge_pic16SwitchLight,
         ),

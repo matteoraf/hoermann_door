@@ -6,3 +6,5 @@
 /pic16/nbproject/private
 /pic16/nbproject/Makefile-*.*
 /pic16/nbproject/Package-default.bash
+settings.json
+.clang-format

@@ -76,9 +76,6 @@ void UAPBridge_pic16DataHasChangedSensor::setup() {
 void UAPBridge_pic16DataHasChangedSensor::on_event_triggered() {
     if (this->parent_->has_data_changed() != this->state) {
         this->publish_state(this->parent_->has_data_changed());
-        if (this->parent_->has_data_changed()) {
-            this->parent_->clear_data_changed_flag(); // Clear the flag after publishing true
-        }
     }
 }
 

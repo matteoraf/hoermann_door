@@ -6,6 +6,7 @@ from esphome.const import (
     DEVICE_CLASS_CONNECTIVITY,
     DEVICE_CLASS_PROBLEM,
     DEVICE_CLASS_SAFETY,
+    ENTITY_CATEGORY_DIAGNOSTIC,
 )
 
 DEPENDENCIES = ["uapbridge_pic16"]
@@ -29,6 +30,7 @@ CONFIG_SCHEMA = cv.Schema(
             UAPBridge_pic16Communication
         ).extend({
             cv.Optional("device_class", default=DEVICE_CLASS_CONNECTIVITY): cv.string,
+            cv.Optional("entity_category", default=ENTITY_CATEGORY_DIAGNOSTIC): cv.entity_category,
         }),
         cv.Optional(CONF_RELAY_STATE): binary_sensor.binary_sensor_schema(
             UAPBridge_pic16RelaySensor
@@ -45,7 +47,10 @@ CONFIG_SCHEMA = cv.Schema(
         }),
         cv.Optional(CONF_DATA_HAS_CHANGED): binary_sensor.binary_sensor_schema(
             UAPBridge_pic16DataHasChangedSensor
-        ),
+        ).extend({
+            cv.Optional("device_class", default=DEVICE_CLASS_CONNECTIVITY): cv.string,
+            cv.Optional("entity_category", default=ENTITY_CATEGORY_DIAGNOSTIC): cv.entity_category,
+        }),
     }
 )
 
