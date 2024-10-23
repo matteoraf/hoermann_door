@@ -71,12 +71,12 @@ void UAPBridge_pic16PrewarnSensor::dump_config() {
 // GotValidBroadcast Sensor (formerly DataHasChanged)
 void UAPBridge_pic16GotValidBroadcast::setup() {
   this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
-  this->publish_state(this->parent_->valid_broadcast());
+  this->publish_state(this->parent_->get_valid_broadcast());
 }
 
 void UAPBridge_pic16GotValidBroadcast::on_event_triggered() {
-  if (this->parent_->valid_broadcast() != this->state) {
-    this->publish_state(this->parent_->valid_broadcast());
+  if (this->parent_->get_valid_broadcast() != this->state) {
+    this->publish_state(this->parent_->get_valid_broadcast());
   }
 }
 

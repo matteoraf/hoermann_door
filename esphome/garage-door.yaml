@@ -98,8 +98,8 @@ binary_sensor:
       name: "Error State"
     prewarn_state:
       name: "Prewarn State"
-    data_has_changed:
-      name: "Changed Data Received"
+    got_valid_broadcast:
+      name: "Valid Status received"
 
 output:
   - platform: uapbridge_pic16
