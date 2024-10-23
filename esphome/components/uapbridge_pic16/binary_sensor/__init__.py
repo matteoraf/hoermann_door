@@ -15,13 +15,13 @@ UAPBridge_pic16Communication = uapbridge_pic16_ns.class_("UAPBridge_pic16Communi
 UAPBridge_pic16RelaySensor = uapbridge_pic16_ns.class_("UAPBridge_pic16RelaySensor", binary_sensor.BinarySensor, cg.Component)
 UAPBridge_pic16ErrorSensor = uapbridge_pic16_ns.class_("UAPBridge_pic16ErrorSensor", binary_sensor.BinarySensor, cg.Component)
 UAPBridge_pic16PrewarnSensor = uapbridge_pic16_ns.class_("UAPBridge_pic16PrewarnSensor", binary_sensor.BinarySensor, cg.Component)
-UAPBridge_pic16DataHasChangedSensor = uapbridge_pic16_ns.class_("UAPBridge_pic16DataHasChangedSensor", binary_sensor.BinarySensor, cg.Component)
+UAPBridge_pic16GotValidBroadcast = uapbridge_pic16_ns.class_("UAPBridge_pic16GotValidBroadcast", binary_sensor.BinarySensor, cg.Component)
 
 CONF_PIC16_COM = "pic16_com"
 CONF_RELAY_STATE = "relay_state"
 CONF_ERROR_STATE = "error_state"
 CONF_PREWARN_STATE = "prewarn_state"
-CONF_DATA_HAS_CHANGED = "data_has_changed"
+CONF_GOT_VALID_BROADCAST = "got_valid_broadcast" 
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -45,8 +45,8 @@ CONFIG_SCHEMA = cv.Schema(
         ).extend({
             cv.Optional("device_class", default=DEVICE_CLASS_SAFETY): cv.string,
         }),
-        cv.Optional(CONF_DATA_HAS_CHANGED): binary_sensor.binary_sensor_schema(
-            UAPBridge_pic16DataHasChangedSensor
+        cv.Optional(CONF_GOT_VALID_BROADCAST): binary_sensor.binary_sensor_schema(
+            UAPBridge_pic16GotValidBroadcast
         ).extend({
             cv.Optional("device_class", default=DEVICE_CLASS_CONNECTIVITY): cv.string,
             cv.Optional("entity_category", default=ENTITY_CATEGORY_DIAGNOSTIC): cv.entity_category,
@@ -77,7 +77,7 @@ async def to_code(config):
         await cg.register_component(prewarn_sens, conf)
         cg.add(prewarn_sens.set_uapbridge_pic16_parent(parent))
     
-    if conf := config.get(CONF_DATA_HAS_CHANGED):
-        data_changed_sens = await binary_sensor.new_binary_sensor(conf)
-        await cg.register_component(data_changed_sens, conf)
-        cg.add(data_changed_sens.set_uapbridge_pic16_parent(parent))
+    if conf := config.get(CONF_GOT_VALID_BROADCAST):
+        got_valid_broadcast_sens = await binary_sensor.new_binary_sensor(conf)
+        await cg.register_component(got_valid_broadcast_sens, conf)
+        cg.add(got_valid_broadcast_sens.set_uapbridge_pic16_parent(parent))
