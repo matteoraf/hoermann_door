@@ -2,6 +2,15 @@
 substitutions:
   name: "e3-supra-pic16"
   friendly_name: "E3 Supramatic PIC16"
+  light: "${friendly_name} Light"
+  connection_state: "${name} Connected"
+  relay_name: "${friendly_name} Relay"
+  error_state: "${name} Error State"
+  prewarn_state: "${name} Prewarn"
+  got_valid_broadcast: "${friendly_name} Valid Status received"
+  sen_txt: "${friendly_name} State" 
+  sw_vent: "${friendly_name} Venting" 
+
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
@@ -11,11 +20,6 @@ esphome:
 external_components:
     - source: github://14yannick/hoermann_door
       refresh: 0s
-
-#external_components: #for local development
-#  - source:
-#      type: local
-#      path: components
 
 wifi:
   ssid: !secret wifi_ssid
@@ -28,20 +32,6 @@ api:
 ota:  
   - platform: esphome
     password: !secret ota_password
-
-#preflashed boards config
-#wifi:
-#  ap:
-#    password: "12345678"
-
-#captive_portal:
-
-#api:
-  
-#ota:  
-#  - platform: esphome
-
-#end preflashed config.
 
 logger:
   level: WARN
@@ -61,7 +51,7 @@ uapbridge_pic16:
 text_sensor:
   - platform: uapbridge_pic16
     id: garage_door_state
-    name: "State"
+    name: "${sen_txt}"
     #uncomment the line for custom text
 #    filters:
 #      - substitute:
@@ -75,14 +65,14 @@ text_sensor:
 
 cover:
   - platform: uapbridge_pic16
-    name: Garage Door
+    name: "${friendly_name}"
     device_class: garage
 
 switch:
   - platform: uapbridge_pic16
     venting_switch:
       id: venting_switch
-      name: "Venting Switch"
+      name: "${sw_vent}"
 #uncomment if you want to use the switch insteat of the light component for light
 #    light_switch:
 #      id: light_switch
@@ -91,15 +81,15 @@ switch:
 binary_sensor:
   - platform: uapbridge_pic16
     pic16_com:
-      name: "UAPBridge Connected"
+      name: "${connection_state}"
     relay_state:
-      name: "Relay State"
+      name: "${relay_name}"
     error_state:
-      name: "Error State"
+      name: "${error_state}"
     prewarn_state:
-      name: "Prewarn State"
+      name: "${prewarn_state}"
     got_valid_broadcast:
-      name: "Valid Status received"
+      name: "${got_valid_broadcast}"
 
 output:
   - platform: uapbridge_pic16
@@ -108,7 +98,7 @@ output:
 light:
   - platform: binary
     id: my_light
-    name: "UAPBridge Light"
+    name: "${sw_vent}"
     output: gd_light
 
 #optional BME Sensor
