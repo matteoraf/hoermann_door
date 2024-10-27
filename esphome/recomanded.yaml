@@ -1,15 +1,23 @@
 # These substitutions allow the end user to override certain values
 substitutions:
-  name: "e3-supra-pic16"
-  friendly_name: "E3 Supramatic PIC16"
+  name: "e3-pic16"
+  friendly_name: "E3 PIC16"
+  state: "State"
+  opening: "Opening"
+  closing: "Closing"
+  open: "Open"
+  closed: "Closed"
+  stopped: "Stopped"
+  venting: "Venting"
+  error: "Error"
+  pic16_com: "PIC16 Communication"
+  relay_state: "Relay state"
+  got_valid_broadcast: "Valid Status received" 
+  error_state: "Error State" 
+  prewarn_state: "Prewarn State" 
   light: "${friendly_name} Light"
-  connection_state: "${name} Connected"
-  relay_name: "${friendly_name} Relay"
-  error_state: "${name} Error State"
-  prewarn_state: "${name} Prewarn"
-  got_valid_broadcast: "${friendly_name} Valid Status received"
-  sen_txt: "${friendly_name} State" 
   sw_vent: "${friendly_name} Venting" 
+  sw_light: "Switch Light" 
 
 esphome:
   name: "${name}"
@@ -48,24 +56,9 @@ uapbridge_pic16:
   id: garage_door_comp
   uart_id: uart_bus
 
-text_sensor:
-  - platform: uapbridge_pic16
-    id: garage_door_state
-    name: "${sen_txt}"
-    #uncomment the line for custom text
-#    filters:
-#      - substitute:
-#        - "Opening -> your text"
-#        - "Closing -> your text"
-#        - "Open -> your text"
-#        - "Closed -> your text"
-#        - "Stopped -> your text"
-#        - "Venting -> your text"
-#        - "Error -> your text"
-
 cover:
   - platform: uapbridge_pic16
-    name: "${friendly_name}"
+    name: ${friendly_name}
     device_class: garage
 
 switch:
@@ -76,14 +69,14 @@ switch:
 #uncomment if you want to use the switch insteat of the light component for light
 #    light_switch:
 #      id: light_switch
-#      name: "Light Switch"
+#      name: "${sw_light}"
 
 binary_sensor:
   - platform: uapbridge_pic16
     pic16_com:
-      name: "${connection_state}"
+      name: "${pic16_com}"
     relay_state:
-      name: "${relay_name}"
+      name: "${relay_state}"
     error_state:
       name: "${error_state}"
     prewarn_state:
@@ -98,8 +91,23 @@ output:
 light:
   - platform: binary
     id: my_light
-    name: "${sw_vent}"
+    name: "${light}"
     output: gd_light
+
+text_sensor:
+  - platform: uapbridge_pic16
+    id: garage_door_state
+    name: "${state}"
+    #uncomment the line for custom text
+#    filters:
+#      - substitute:
+#        - "Opening -> ${opening}"
+#        - "Closing -> ${closing}"
+#        - "Open -> ${open}"
+#        - "Closed -> ${closed}"
+#        - "Stopped -> ${stopped}"
+#        - "Venting -> ${venting}"
+#        - "Error -> ${error}"
 
 #optional BME Sensor
 #i2c:
