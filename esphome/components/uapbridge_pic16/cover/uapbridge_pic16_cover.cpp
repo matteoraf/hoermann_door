@@ -2,22 +2,22 @@
 namespace esphome {
 namespace uapbridge_pic16 {
 
-static const char *const TAG = "uapbridge_pic16.cover";
+static const char* const TAG = "uapbridge_pic16.cover";
 
 void UAPBridge_pic16Cover::setup() {
-    this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
+  this->parent_->add_on_state_callback([this]() { this->on_event_triggered(); });
 }
-
 
 cover::CoverTraits UAPBridge_pic16Cover::get_traits() {
-    auto traits = cover::CoverTraits();
-    traits.set_is_assumed_state(false);
-    traits.set_supports_position(true);
-    traits.set_supports_tilt(false);
-    return traits;
+  auto traits = cover::CoverTraits();
+  traits.set_is_assumed_state(false);
+  traits.set_supports_position(true);
+  traits.set_supports_stop(true);
+  traits.set_supports_tilt(false);
+  return traits;
 }
 
-void UAPBridge_pic16Cover::control(const cover::CoverCall &call) {
+void UAPBridge_pic16Cover::control(const cover::CoverCall& call) {
   if (call.get_position().has_value()) {
     float position = *call.get_position();
     if (position == 0) {
@@ -37,8 +37,8 @@ void UAPBridge_pic16Cover::control(const cover::CoverCall &call) {
   }
 }
 
-void UAPBridge_pic16Cover::on_event_triggered(){
-    switch (this->parent_->get_state()){
+void UAPBridge_pic16Cover::on_event_triggered() {
+  switch (this->parent_->get_state()) {
     case UAPBridge_pic16::hoermann_state_t::hoermann_state_opening:
       this->current_operation = cover::COVER_OPERATION_OPENING;
       break;
@@ -61,7 +61,7 @@ void UAPBridge_pic16Cover::on_event_triggered(){
       this->current_operation = cover::COVER_OPERATION_CLOSING;
       break;
   }
-  if (this->previousState_ != this->parent_->get_state() || this->previousOperation_ != this->current_operation){
+  if (this->previousState_ != this->parent_->get_state() || this->previousOperation_ != this->current_operation) {
     ESP_LOGV(TAG, "HCPBridgeCover::update() - position is %f", this->position);
     ESP_LOGV(TAG, "HCPBridgeCover::update() - operation is %d", this->current_operation);
     ESP_LOGD(TAG, "HCPBridgeCover::update() - state changed");
