@@ -2,11 +2,7 @@
 
 namespace esphome {
 namespace uapbridge_pic16 {
-static const char *const TAG = "uapbridge_pic16";
-
-void UAPBridge_pic16::setup() {
-  ESP_LOGCONFIG(TAG, "Garage setup called!");
-}
+static const char* const TAG = "uapbridge_pic16";
 
 void UAPBridge_pic16::loop() {
   // Timeout mechanism for PIC16 communication
@@ -31,10 +27,6 @@ void UAPBridge_pic16::loop() {
   }
 }
 
-void UAPBridge_pic16::add_on_state_callback(std::function<void()> &&callback) {
-  this->state_callback_.add(std::move(callback));
-}
-
 void UAPBridge_pic16::action_open() {
   ESP_LOGD(TAG, "Action: open called");
   this->actual_action = hoermann_action_open;
@@ -47,7 +39,16 @@ void UAPBridge_pic16::action_close() {
 
 void UAPBridge_pic16::action_stop() {
   ESP_LOGD(TAG, "Action: stop called");
-  this->actual_action = hoermann_action_stop;
+  if (this->pic16_version > 1) {
+    this->action_soft_stop();
+  } else {
+    this->actual_action = hoermann_action_stop;
+  }
+}
+
+void UAPBridge_pic16::action_soft_stop() {
+  ESP_LOGD(TAG, "Action: soft stop called");
+  this->actual_action = hoermann_action_soft_stop;
 }
 
 void UAPBridge_pic16::action_venting() {
@@ -58,6 +59,11 @@ void UAPBridge_pic16::action_venting() {
 void UAPBridge_pic16::action_toggle_light() {
   ESP_LOGD(TAG, "Action: toggle light called");
   this->actual_action = hoermann_action_toggle_light;
+}
+
+void UAPBridge_pic16::action_impulse() {
+  ESP_LOGD(TAG, "Action: impulse called");
+  this->actual_action = hoermann_action_impulse;
 }
 
 UAPBridge_pic16::hoermann_state_t UAPBridge_pic16::get_state() {
@@ -78,28 +84,16 @@ void UAPBridge_pic16::set_venting(bool state) {
   ESP_LOGD(TAG, "Venting state set to %s", state ? "ON" : "OFF");
 }
 
-bool UAPBridge_pic16::get_venting_enabled() {
-  return this->venting_enabled;
-}
-
 void UAPBridge_pic16::set_light(bool state) {
   this->light_enabled = state;
-  if (state) {
-    this->action_toggle_light();
-  }
   ESP_LOGD(TAG, "Light state set to %s", state ? "ON" : "OFF");
 }
 
-bool UAPBridge_pic16::get_light_enabled() {
-  return this->light_enabled;
+void UAPBridge_pic16::set_pic16_version(int value) {
+  this->pic16_version = value;
 }
-
-bool UAPBridge_pic16::has_data_changed() {
-  return this->data_has_changed;
-}
-
-void UAPBridge_pic16::clear_data_changed_flag() {
-  this->data_has_changed = false;
+int UAPBridge_pic16::get_pic16_version() const {
+  return this->pic16_version;
 }
 
 bool UAPBridge_pic16::read_rs232() {
@@ -117,7 +111,7 @@ bool UAPBridge_pic16::read_rs232() {
       this->rx_buffer[counter++] = data;
       if (counter == 3) {
         if (data < 16) {
-          len = data + 4; // 3 = SYNC + CMD + LEN + CHK, limit to 15 data bytes
+          len = data + 4;  // 3 = SYNC + CMD + LEN + CHK, limit to 15 data bytes
         } else {
           counter = 0;  // Reset if length is invalid
         }
@@ -126,7 +120,7 @@ bool UAPBridge_pic16::read_rs232() {
           // Final check: make sure the length and checksum are valid
           if (len > 0) {  // You could add extra checks here
             counter = 0;
-            this->last_parse_time = millis(); // Update last parse time here
+            this->last_parse_time = millis();  // Update last parse time here
             return true;
           }
         }
@@ -180,17 +174,17 @@ void UAPBridge_pic16::parse_input() {
   }
 }
 
-
 void UAPBridge_pic16::send_command() {
   this->output_buffer[0] = SYNC_BYTE;
   this->output_buffer[1] = 0x01;
   this->output_buffer[2] = 0x01;
   this->output_buffer[3] = (uint8_t)this->actual_action;
-  this->output_buffer[4] = this->output_buffer[0] + this->output_buffer[1] + this->output_buffer[2] + this->output_buffer[3];
+  this->output_buffer[4] =
+      this->output_buffer[0] + this->output_buffer[1] + this->output_buffer[2] + this->output_buffer[3];
   this->write_array(&this->output_buffer[0], 5);
 }
 
-uint8_t UAPBridge_pic16::calc_checksum(uint8_t *p_data, uint8_t length) {
+uint8_t UAPBridge_pic16::calc_checksum(uint8_t* p_data, uint8_t length) {
   uint8_t crc = 0;
   for (uint8_t i = 0; i < length; ++i) {
     crc += p_data[i];
@@ -229,7 +223,7 @@ void UAPBridge_pic16::handle_state_change(hoermann_state_t new_state) {
   this->data_has_changed = true;
 }
 
-void UAPBridge_pic16::update_boolean_state(bool &current_state, bool new_state) {
+void UAPBridge_pic16::update_boolean_state(bool& current_state, bool new_state) {
   if (current_state != new_state) {
     current_state = new_state;
     this->data_has_changed = true;

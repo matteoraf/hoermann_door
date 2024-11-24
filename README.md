@@ -1,77 +1,173 @@
-# hoermann_door
-Control Hörmann doors drives directly via MQTT from Home Assistant
+# Hörmann Door Drive Controller  
+Control Hörmann door drives directly via ESPHome. 🚪✨  
+This project emulates a UAP1 and provides a seamless way to integrate Hörmann door drives, such as the Supramatic E3, into Home Assistant.  
 
-Inspired by https://blog.bouni.de/posts/2018/hoerrmann-uap1/
+⚠️ **Use at your own risk!**  
 
-**USE AT YOUR OWN RISK!**
+---
 
-# Overview
+## 🚨 Breaking Change Notice  
 
-This repo contains the pcb files as well as the software to build an interface device which connects Hörmann door drives like the Supramatic E3 to Home Assistant. The interface device emulates an UAP1 to interact with the door drive. Additionally a BME280 can be connected via I2C to measure temperature, humidity and pressure.
+**Thanks to @Rezoran** for porting this project to hardware without a PIC16 microcontroller!  
+The platform for common components has been renamed from `uapbridge_pic16` to `uapbridge`.  
 
-<p align="center">
-    <img src="docs/pcb1.png?raw=true">
-    <img src="docs/pcb2.png?raw=true">
-</p>
+### Update Required:  
+Updating form previous version you need to update your ESPHome YAML configuration. See also the recommended_pic16.yaml. 
 
-The door drive is automatically added to Home Assistant via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/).
+#### Example Change:  
 
-<p align="center">
-    <img src="docs/device.png?raw=true">
-</p>
+Before:  
+```yaml
+cover:
+  - platform: uapbridge_pic16
+    name: ${friendly_name}
+    device_class: garage
+```
+After:
+```yaml
+cover:
+  - platform: uapbridge
+    name: ${friendly_name}
+    device_class: garage
+```
+---
 
-# Folder structure
+## Overview  
 
-* `board`: The Eagle schematic and board files
-* `docs`: Documentation
-* `esp8266`: Arduino project. Communication to Home Assistant via wifi and mqtt
-* `pic16`: MPLabX project. Communication with door drive via Hörmann bus
+This repository includes:  
+- PCB designs.  
+- Firmware for an interface device that emulates a Hörmann UAP1.  
+- ESPHome configuration to integrate your door drive into Home Assistant.  
+- Optional support for the BME280 sensor to measure temperature, humidity, and pressure.  
 
-# Thing to do first
+**Note:** This solution is NOT compatible with 4th series drives.  
 
-1. Get a pcb
-    * Optionally, get BME280 sensor pcb
-    * Supply pcb with 24V via pins 2 & 3 of `J1`
-    * Check if 5V and 3.3V are fine
-1. Get tools listed below
-1. Rename esp8266/config_template.h to esp8266/config.h and adjust to your environment
-1. Add `esp8266` boards to Arduino IDE
-    * Open Preferences window
-    * Enter http://arduino.esp8266.com/stable/package_esp8266com_index.json into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
-    * Open Boards Manager from Tools > Board menu and find `esp8266` platform.
-    * Click install button.
-    * Select `NodeMCU 1.0 (ESP-12E Module)` as board
-1. Add Libraries to Arduino IDE
-    * Open Sketch > Include library -> Manage libraries...
-    * Install `PubSubClient` (tested with version 2.8.0)
-    * Install `PubSubClientTools` (tested with version 0.6.0)
-    * Install `Adafruit Unified Sensor` (tested with version 1.1.4)
-    * Install `Adafruit BME280 Library` (tested with version 2.1.2)
-1. First flashing of `esp8266`
-    * Get a cheap USB-UART converter (like the ones with a `CP210x`)
-    * Connect the converter to `SV3` (RX, TX and GND)
-    * Short `JP1` (Boot mode)
-    * Power up board. If board was powered before reset `esp8266` by shorting `JP2`(Reset) for a short time
-1. Flashing `pic16`
-    * Use any Microchip programmer (PICkit3, ICD3, ...)
-    * Open MPLabX and click on File -> Open Project
-    * Select `pic16` subfolder (chip icon)
-    * Click Clean an Build Main Project
-    * Click Make and Program Device Main Project
+---
 
-# Used tools
+## Features  
 
-## Schematic and board
-* Eagle 7.2.0
+- Emulates Hörmann UAP1 for seamless control.  
+- Supports two variants:  
+  1. **Prebuilt PCB with PIC16 MCU.**  
+  2. **ESP32 with RS485 Transceiver.**  
+- Backward compatibility with older PIC16 firmware.  
 
-## ESP8266
-* Arduino IDE 1.8.13
-* USB-UART converter
+---
 
-## PIC16
-* MPLabX v5.25
-* XC8 v2.10
-* PICkit3
+## Getting Started  
 
+### Variant 1: Prebuilt PCB with PIC16 MCU  
 
+<p align="center">  
+    <img src="docs/pcb1.png" alt="PCB 1">  
+    <img src="docs/pcb2.png" alt="PCB 2">  
+</p>  
 
+- **Ready-made solution:** Get a fully assembled PCB from [Tindie](https://www.tindie.com/products/14yannick/uapbridge_pic16/).  
+    - Preflashed with PIC16 v2 firmware for "Soft Stop" and "Impulse" commands.  
+- **Build your own:** Assemble a PCB using files in the `board` folder.  
+    - Optionally, add a BME280 sensor for environmental data.  
+
+### Variant 2: ESP32 with RS485 Transceiver  
+
+<p align="center">  
+    <img src="docs/PCB.png" width="400px" alt="ESP32 with RS485">  
+    <img src="docs/installation.png" width="230px" alt="Installation Example">  
+</p>  
+
+- Build a PCB with an RS485 transceiver.  
+- Adjust ESPHome configuration using provided examples.  
+- Install ESPHome firmware using the [ESPHome Web tool](https://web.esphome.io/).  
+- Perform OTA updates via your ESPHome instance.  
+
+---
+
+## ESPHome Integration  
+
+This repo includes ESPHome configurations for both variants:  
+
+1. **PIC16 Variant**  
+    - [Preflashed Configuration](esphome/preflashed_pic16.yaml)  
+    - [Recommended Configuration](esphome/recommended_pic16.yaml)  
+
+    <p align="center">  
+        <img src="docs/esphome1.png" alt="ESPHome Integration">  
+    </p>  
+
+    **Compatibility Note:** Use the `pic16_version` parameter to ensure compatibility with older PIC16 firmware:  
+    - `pic16_version: 2` for "Soft Stop" support.  
+    - `pic16_version: 1` for older firmware, using "Emergency Stop" instead.  
+
+2. **ESP32 with RS485 Variant**  
+    - [ESP and RS485 Configuration](esphome/recommended_esp.yaml)  
+
+---
+
+## Legacy Arduino MQTT Build  
+
+The original project used an Arduino sketch for MQTT-based integration with Home Assistant.  
+This legacy code is no longer maintained but can be found [here](https://github.com/stephan192/hoermann_door).  
+
+---
+
+## Folder Structure  
+
+- **`board`**: Eagle schematic and PCB design files.  
+- **`docs`**: Documentation and images.  
+- **`pic16`**: MPLabX project files for the PIC16.  
+- **`esphome`**: ESPHome components and configurations.  
+
+---
+
+## Step-by-Step Guide  
+
+### For PIC16 MCU Variant  
+
+1. **Get a PCB:**  
+    - Purchase a fully assembled PCB from Tindie, or build one from the `board` folder.  
+
+2. **Power the PCB:**  
+    - Supply 24V via pins 2 & 3 of `J1`.  
+    - Check 5V and 3.3V outputs.  
+
+3. **Flash the ESP8266:**  
+    - Use a USB-UART converter (e.g., CP210x).  
+    - Connect the converter to `SV3` (RX, TX, GND).  
+    - Short `JP1` for boot mode, power up, and reset via `JP2`.  
+
+4. **Flash the PIC16:**  
+    - Use a Microchip programmer (PICkit3, ICD3, etc.).  
+    - Open the MPLabX project in the `pic16` folder.  
+    - Build and program the device.  
+
+### For ESP32 with RS485 Transceiver  
+
+1. Build or purchase a PCB with RS485 and ESP32.  
+2. Adjust the ESPHome configuration to match your hardware setup.  
+3. Install the initial firmware using the [ESPHome Web tool](https://web.esphome.io/).  
+4. Perform OTA updates from your ESPHome instance.  
+
+---
+
+## Tools Used  
+
+### For PIC16 Variant  
+- **PCB Design:** Eagle 7.2.0  
+- **ESP8266 Programming:** Arduino IDE 1.8.13, USB-UART converter  
+- **PIC16 Programming:** MPLabX v5.25, XC8 v2.10, PICkit3  
+
+### For ESP32 with RS485 Variant  
+- **Hardware:**  
+  - ESP32 DevKit v4  
+  - DC/DC 24V -> 5V Step-Down Converter  
+  - RS485 Transceiver (e.g., SN65HVD72 or HW519)  
+
+---
+
+## Credits and Inspiration  
+
+This project builds upon the work of many in the community:  
+- [Hörmann UAP1 Analysis](https://blog.bouni.de/posts/2018/hoerrmann-uap1/)  
+- [Steff393's HGDO Project](https://github.com/steff393/hgdo)  
+- [Avshrs' ESP32 Hörmann Supramatic](https://github.com/avshrs/ESP32_Hormann_Supramatic_e3)  
+- [Hörmann Patent](https://patents.google.com/patent/WO2005076529A1/de)  
