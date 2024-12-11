@@ -69,7 +69,7 @@ void UAPBridgeCover::on_event_triggered() {
     ESP_LOGV(TAG, "UAPBridgeCover::update() - position is %f", this->position);
     ESP_LOGV(TAG, "UAPBridgeCover::update() - operation is %d", this->current_operation);
     ESP_LOGD(TAG, "UAPBridgeCover::update() - state changed");
-    this->publish_state(false);
+    this->publish_state();
     this->previousState_ = this->parent_->get_state();
     this->previousOperation_ = this->current_operation;
   }
